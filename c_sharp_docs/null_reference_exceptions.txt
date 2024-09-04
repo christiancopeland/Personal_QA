@@ -1,0 +1,78 @@
+Null Reference Exceptions
+
+A NullReferenceException happens when you try to access a reference variable that doesn’t reference any object. When you try to access a reference variable that doesn’t reference an object, the reference type defaults to null and Unity returns a NullReferenceException.
+
+When you get a NullReferenceException in your code it means that you have forgotten to set a variable before using it. The error message looks something like:
+
+NullReferenceException: Object reference not set to an instance of an object
+    at Example.Start () [0x0000b] in /Unity/projects/nre/Assets/Example.cs:10 
+
+This error message says that a NullReferenceException happened on line 10 of the script file Example.cs, and that the exception happened inside the Start() function. This makes the Null Reference Exception easy to find and fix. In this example, the code is:
+
+using UnityEngine;
+using System.Collections;
+
+public class Example : MonoBehaviour {
+
+    // Use this for initialization
+    void Start () {
+        GameObject go = GameObject.Find("exampleGameObject");
+        Debug.Log(go.name);
+    }
+    
+}
+
+The code looks for a GameObject
+called “exampleGameObject”. In this example there is no GameObject with that name, so the Find() function returns null. On the next line (line 9) the script uses the go variable to print out the name of the GameObject it references. Because it is trying to access a GameObject that doesn’t exist, Unity returns a NullReferenceException
+Null checks
+
+The solution in this example is to include an outcome for situations where the GameObject with the given name does not exist. The following script checks whether the go variable returns null, and displays a message if so:
+
+using UnityEngine;
+using System.Collections;
+
+public class Example : MonoBehaviour {
+
+    void Start () {
+        GameObject go = GameObject.Find("exampleGameObject");
+        if (go) {
+            Debug.Log(go.name);
+        } else {
+            Debug.Log("No GameObject called exampleGameObject found");
+        }
+    }
+        
+}
+
+Try/Catch blocks
+
+Unity also calls NullReferenceException if you use a variable that needs to be initialized in the Inspector
+. If you forget to do this, then the variable is null. A different way to deal with NullReferenceException is to use try/catch blocks. For example:
+
+using UnityEngine;
+using System;
+using System.Collections;
+
+public class Example2 : MonoBehaviour {
+
+    public Light myLight; // set in the inspector
+    
+    void Start () {
+        try {
+            myLight.color = Color.yellow;
+        }       
+        catch (NullReferenceException ex) {
+            Debug.Log("myLight was not set in the inspector");
+        }
+    }
+    
+}
+
+In this code example, the variable called myLight is a Light which you need to set in the Inspector window. If this variable is not set, then it defaults to null.
+
+Attempting to change the color of the light in the try block causes a NullReferenceException. If this happens, the catch block code displays a message reminding you to set the Light in the inspector.
+Summary
+
+    NullReferenceException happens when your script code tries to use a variable that doesn’t reference an object.
+    The error message that appears tells you a great deal about where in the code the problem happens.
+    To avoid NullReferenceException, write code that checks for null before accessing a GameObject, or uses try/`catch`` blocks.

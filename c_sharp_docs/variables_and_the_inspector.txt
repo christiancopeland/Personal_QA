@@ -1,0 +1,84 @@
+Variables and the Inspector
+
+When you create a script in the Editor, Unity automatically provides a template script which inherits from the MonoBehaviour class. Inheriting from the MonoBehaviour class means your script can behave like a type of component, and you can attach it to GameObjects
+like any other component.
+
+When your script inherits from MonoBehaviour, you can include properties and values in your script which you can then edit from the Editor Inspector
+, like you can with any other component.
+
+The example code below declares a public variable called myName. When you place this script on a GameObject in your scene
+, the variable becomes visible in the Inspector as a field labelled “My Name”. The default value of “none” declared in the script becomes the default value in the field in the Inspector, which you can then change by typing into the field.
+
+using UnityEngine;
+using System.Collections;
+
+public class MainPlayer : MonoBehaviour 
+{
+    public string myName = "none";
+    
+    // Use this for initialization
+    void Start () 
+    {
+        Debug.Log("I am alive and my name is " + myName);
+    }
+}
+
+Each GameObject that you place your script component on can have its own unique value for the field.
+A public string field editable in the inspector window.
+A public string field editable in the inspector window.
+
+To create the Inspector label, Unity inserts a space between lowercase and uppercase characters in the variable name, and applies several other rules (see Variable name to label conversion). However, these changes are purely for display purposes. You should always use the variable name within your code.
+
+In the Inspector, if you edit the My Name value and press Play, the console message should now include the text that you entered.
+
+In C#, the simplest way to make a variable editable in the Inspector is to declare it as public. If you want to make a private field editable in the inspector, you can use the SerializeField attribute. Conversely, you can use the [HideInInspector] attribute(../ScriptReference/HideInInspector.html) to prevent a public variable from being displayed in the Inspector.
+
+Note: You can change the value of a script’s variables in the Editor while running in play mode. This is very useful for seeing the effects of changes directly without having to stop and restart. However, when you stop play mode, the values of the variables reset to whatever they were before you entered play mode (as is the case for all scripts and components).
+
+Object reference fields
+
+As well as bool, string, and numeric fields, you can also make any field whose type inherits from UnityEngine.Object editable in the inspector. This includes all built-in component types (such as Transform, AudioSource, Camera, Light), your own MonoBehaviour script types, and many asset types.
+
+This allows you to make use of the Unity Editor’s powerful drag-and-drop system in your own scripted components. For example, if you create a public Transform field in your script and add it to one GameObject, you can then drag another GameObject into that field in the inspector to set up a reference to that GameObject’s Transform component
+, which you can then access at run time in your script.
+
+For example, this “Follow” script makes one GameObject follow another:
+
+using UnityEngine;
+
+public class Follow : MonoBehaviour
+{
+    public Transform objectToFollow;
+    public float followSpeed = 1;
+
+    void Update()
+    {
+        // calculate the distance between this object and the target object
+        // and move a small portion of that distance each frame:
+
+        var delta = objectToFollow.position - transform.position;
+        transform.position += delta * Time.deltaTime * followSpeed;
+    }
+}
+
+The script has a public field of type Transform which appears in the Editor as an assignable field. You can drag and drop a different GameObject from your Hierarchy window into this field, and the Editor assigns a reference to the Transform component attached to that dropped GameObject.
+
+In the screenshot below, the script is placed on the Sphere GameObject, and the Cube has been dragged and dropped from the Hierarchy into the “Object To Follow” field.
+A public Transform field with a GameObject assigned. Here the script is on the Sphere (currently selected), and the Cube was dragged and dropped from the Hierarchy into the Spheres Object To Follow field
+A public Transform field with a GameObject assigned. Here the script is on the Sphere (currently selected), and the Cube was dragged and dropped from the Hierarchy into the Sphere’s “Object To Follow” field
+
+Note: you can also set up default object references for public object reference fields in your MonoBehaviour scripts
+.
+
+Variable name to label conversion
+
+The Inspector applies several rules when it converts your variable name to a label in the Inspector. For example, the variable names in the examples above have been converted from myName to “My Name”, and from objectToFollow to “Object To Follow”. The rules are as follows:
+
+    Capitalize the first letter
+    Add a space between lowercase and uppercase characters
+    Add a space between an acronym and an uppercase character at the beginning of the next word
+    Remove “m_” from the beginning
+    Remove “k” from the beginning
+    Remove “_” from the beginning
+
+There are some special cases, such as “iPad” or “x64”, where these rules are not applied.

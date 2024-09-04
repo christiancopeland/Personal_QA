@@ -1,0 +1,39 @@
+Object
+Switch to Scripting
+
+Unity has a class in the UnityEngine namespace called Object, which acts as a base class for all objects that Unity can reference in the editor. Classes which inherit from UnityEngine.Object have special functionality which means they can be dragged and dropped into fields in the Inspector
+, or picked using the Object Picker next to an Object field.
+
+This page provides an overview of the Object class and its common uses when scripting with it. For an exhaustive reference of every member of the Object class, see the Object script reference.
+An example of an Object Field in the Inspector window. The Object Picker is the circular icon to the right of the field.
+An example of an Object Field in the Inspector window. The Object Picker is the circular icon to the right of the field.
+
+When creating your own objects via scripting, you typically do not want to inherit directly from Object. Instead, you should inherit from a class designed to be more specific to your goal.
+
+For example, you should inherit from MonoBehaviour if you want to write a custom component which you can add to a GameObject
+, to control what the GameObject does or provide some functionality relating to it.
+
+Or, you should inherit from ScriptableObject if you want to create custom assets which can store serialized data. Both of these inherit from Unity’s Object class, but provide extra functionality to suit those purposes.
+
+Note: Unity’s Object class is in the UnityEngine namespace. This is different from .NET’s base Object class, which has the same name, but is the System namespace, and is not included in the default script template, so that the names do not clash. You can still inherit your classes from .NET’s System.Object if you want to create classes in your script which do not need to be assigned in the inspector.
+
+Unity’s Object class acts as the base class for most of Unity’s built-in classes such as GameObject, Component, Material, Texture, Mesh
+, Sprite
+, and many more, which means all of these types can be dragged and dropped into these reference fields in the inspector.
+
+If a field in the inspector specifies a specific type of class (such as Texture), then Unity restricts you from dropping any other type of object into that field, and the object picker will only show objects of the correct type.
+Three different types of object field in the inspector.
+Three different types of object field in the inspector.
+
+The above image shows three types of object field in the inspector.
+
+The first is of type Object, meaning any Unity Object can be assigned to this field. You could drop any type of object into this field, whether it was a GameObject, a Texture, an Audio Clip
+, or anything else. This is not usually very useful, and it’s better to make your fields be more specific about what they should accept.
+
+The second shows that its type is “Texture”, as shown in the parentheses. Texture is a built-in Unity class, and this means you can drop any Texture Asset into this field. Unity has two classes which inherit from this, Texture2D and RenderTexture, which means you can drop either of these types into this field.
+
+The third shows that its type is “Food”. There’s no built-in Unity class with this name, so this example is showing a custom user-made class which inherits from Object. If you were to subsequently create classes which inherit from “Food”, such as “Apple” and “Banana”, you would be able to assign references to instances of these classes into the Food field, because they inherit from that type.
+
+The Object class provides a few methods which allow you to Instantiate and Destroy them properly, as well as finding references to Objects of a specific type.
+
+For more information on the API for the Object class, see the script reference page for Object.

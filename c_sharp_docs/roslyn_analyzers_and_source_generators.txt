@@ -1,0 +1,248 @@
+Roslyn analyzers and source generators
+
+Use Roslyn analyzers, source generators and ruleset files in Unity projects to inspect your code for style, quality, and other issues.
+
+You can use existing analyzer libraries to inspect your code, and write your own analyzers to promote the best practices or conventions within your organization. This page explains how to use Roslyn analyzers and source generators in an empty Unity Project.
+
+Note: Roslyn analyzers are only compatible with the IDEs that Unity publicly supports, which are Visual Studio and JetBrains Rider.
+
+For more information about how to write and use Roslyn analyzers, refer to Microsoft’s Analyzer Configuration and Get started with Roslyn analyzers documentation.
+Source generators
+
+You can use source generators as an additional step in your script compilation process. You can use source generators to add new code while you compile your existing code. Like analyzers, you can use existing source generators or create your own.
+
+Note: Unity only supports version 6.0.0-preview of the ‘System.Text.Json’ namespace. If you want to use this namespace in your application, ensure you use version 6.0.0-preview. For more information about System.Text.Json, refer to Microsoft’s System.Text.Json Namespace documentation.
+
+To set up a source generator using Visual Studio:
+
+    In Visual Studio, create a .NET standard library project that targets .NET Standard 2.0.
+
+    Install the Microsoft.CodeAnalysis NuGet package. Your source generator must use Microsoft.CodeAnalysis 3.8 to work with Unity.
+
+    In your Visual Studio project, create a new C# file and add the following code:
+
+    using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.Text;
+    using System.Text;
+
+    namespace ExampleSourceGenerator
+    {
+        [Generator]
+        public class ExampleSourceGenerator : ISourceGenerator
+        {
+            public void Execute(GeneratorExecutionContext context)
+            {
+                System.Console.WriteLine(System.DateTime.Now.ToString());
+
+                var sourceBuilder = new StringBuilder(
+                @"
+                using System;
+                namespace ExampleSourceGenerated
+                {
+                    public static class ExampleSourceGenerated
+                    {
+                        public static string GetTestText()
+                        {
+                            return ""This is from source generator ");
+
+                sourceBuilder.Append(System.DateTime.Now.ToString());
+
+                sourceBuilder.Append(
+                    @""";
+                        }
+        }
+    }
+    ");
+
+                context.AddSource("exampleSourceGenerator", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
+            }
+
+            public void Initialize(GeneratorInitializationContext context) { }
+        }
+    }
+
+    Build your source generator for release. To do this, go to Build and select the Batch Build option.
+
+    In your source generator’s project folder, find the bin/Release/netstandard2.0/ExampleSourceGenerator.dll file.
+
+    Copy this file into your Unity project, inside the Assets folder.
+
+    Inside the Asset Browser, click on the .dll file to open the Plugin Inspector
+    window.
+
+    Go to Select platforms for plugin and disable Any Platform.
+
+    Go to Include Platforms and disable Editor and Standalone.
+
+    Go to Asset Labels and open the Asset Labels sub-menu.
+
+    Create and assign a new label called RoslynAnalyzer. To do this, enter “RoslynAnalyzer” into the text input window in the Asset Labels sub-menu. This label must match exactly and is case sensitive. After you create the label for the first analyzer, The label appears in the Asset Labels sub-menu. You can click on the name of the label in the menu to assign it to other analyzers.
+
+    A warning will be printed in the console because this source generator will get injected into more than one assembly. The solution is to make ExampleSourceGenerated in the above example internal or the name itself should be generated.
+
+    To test the source generator is working, create a new C# script in the editor with the following code:
+
+    using UnityEngine;
+
+    public class HelloFromSourceGenerator : MonoBehaviour
+    {
+        static string GetStringFromSourceGenerator()
+        {
+            return ExampleSourceGenerated.ExampleSourceGenerated.GetTestText();
+        }
+
+        // Start is called before the first frame update
+        void Start()
+        {
+            var output = "Test";
+            output = GetStringFromSourceGenerator();
+            Debug.Log(output);
+        }
+    }
+
+    Add this script to a GameObject
+    in the scene
+    and enter Play mode. A message from the source generator will appear in the Console window
+    , including the time stamp. A warning will also appear in the console because this source generator will get injected into more than one assembly. The solution is to make ExampleSourceGenerated in the above example internal or the name itself should be generated.
+
+For more information about source generators, refer to Microsoft’s Source Generators documentation.
+Analyzer scope
+
+You can limit the scope of analyzers in your project by using assembly definitions, so that they only analyze certain portions of your code.
+
+Unity applies analyzers to all assemblies in your project’s Assets folder, or in any subfolder whose parent folder doesn’t contain an assembly definition file. If an analyzer is in a folder that contains an assembly definition, or a subfolder of such a folder, the analyzer only applies to the assembly generated from that assembly definition, and to any other assembly that references it.
+
+This means, for example, that a package
+can supply analyzers that only analyze code related to the package, which can help package users to use the package API correctly.
+Report analyzer diagnostics
+
+To view information such as the total execution time of your analyzers and source generators or the relative execution times of each analyzer or source generator, go to Preferences > Diagnostic Switches and enable EnableDomainReloadTimings. When enabled, the information is displayed in the console window.
+Installing an existing Roslyn analyzer or source generator
+
+Unity doesn’t support the installation of Roslyn Analyzers or source generators through NuGet directly. The below example uses the ErrorProne.NET.CoreAnalyzers library to demonstrate how to install Roslyn Analyzers and source generators from NuGet:
+
+    Download the library as a .zip file with the Download package button.
+    Extract the contents of the .zip file.
+    Inside the extracted folder, locate the .dll files that contain the analyzers. In this example, navigate to errorprone.net.coreanalyzers<version-number>\analyzers\dotnet\cd. The required files should be in this folder, named ErrorProne.NET.Core.dll, ErrorProne.Net.CoreAnalyzers.dll, and RuntimeContracts.dll.
+    Move these files into the Assets folder, or any folder nested inside of the Assets folder, in your Unity project. To do this, either go to Assets > Import new asset and select the .dll for each of the three files, or copy them into your project’s Assets folder through your device’s file browser.
+    Click on the .dll file inside the Asset Browser inside Unity to open the Plugin Inspector window.
+    Inside the Plugin Inspector window:
+        Under the Select platforms for plugin heading, disable Any Platform.
+        Under the Include Platforms heading, disable Editor and Standalone.
+    Under the Asset Labels heading in the Plugin Inspector window, click on the blue label icon to open the Asset Labels sub-menu.
+    Create and assign a new label called RoslynAnalyzer. To do this, type “RoslynAnalyzer” into the text input window in the Asset Labels sub-menu and press Return. This label must exactly match the example and is case sensitive. After you create the label for the first analyzer, it appears on the list of available labels in the Asset Labels sub-menu. You can click on the name of the label in the menu to assign it to other analyzers.
+
+Unity recognizes the RoslynAnalyzer label and treats assets with this label as Roslyn Analyzers or source generators. When you assign the label to an analyzer, Unity recompiles scripts
+within the scope of the analyzer and analyzes the code in those scripts according to the rules in the analyzer. Any scripts that are within the same assembly definition as an analyzer are in that analyzer’s scope. For analyzers in the root level of the Assets folder, Unity considers all files in the project to be in scope. For more information about scope, refer to Analyzer scope above.
+
+To test that your analyzers work correctly, follow the example below. If you have installed the analyzers correctly, the ErrorProne.NET analyzer raises warnings when it analyzes the code in the example.
+
+Create a new script file named RethrowError.cs. Copy the following code into this script and save the file:
+
+using System;
+using UnityEngine;
+
+public class RethrowError : MonoBehaviour
+{
+    void Update()
+    {
+        try
+        {
+            DoSomethingInteresting();
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e.Message);
+            throw e;
+        }
+    }
+
+    private void DoSomethingInteresting()
+    {
+        throw new System.NotImplementedException();
+    }
+}
+
+When you save the file, Unity recompiles the script and runs any applicable analyzers on the script’s code. When the ErrorProne.NET analyzer is correctly installed, it raises the following warnings in the Console window about the above code:
+
+Assets\RethrowError.cs(14,23): warning EPC12: Suspicious exception handling: only e.Message is observed in exception block.
+
+Assets\RethrowError.cs(15,19): warning ERP021: Incorrect exception propagation. Use throw; instead.
+Ruleset files
+
+To define your own rules on how to handle the various warnings and errors that the analyzers in your project raise, you can create a ruleset file. For more information on how to create a custom ruleset, refer to Microsoft’s Visual Studio documentation on how to create a custom rule set.
+
+In the Assets root folder, place a ruleset file named Default.ruleset. The rules you define in Default.ruleset apply to all predefined assemblies (for example Assembly-CSharp.dll), and all assemblies that are built using .asmdef files.
+
+To override the rules in Default.ruleset for a predefined assembly, create a .ruleset file in the root folder with the name [PredefinedAssemblyName].ruleset. For example, the rules in Assembly-CSharp.ruleset apply to the code in Assembly-CSharp.dll. Only these .ruleset files are allowed inside the root folder:
+
+    Default.ruleset
+    Assembly-CSharp.ruleset
+    Assembly-CSharp-firstpass.ruleset
+    Assembly-CSharp-Editor.ruleset
+    Assembly-CSharp-Editor-firstpass.ruleset
+
+Workflow: Testing ruleset files in Unity
+
+To test ruleset files in Unity, follow these steps:
+Step 1: Set up the ruleset file
+
+    Create a subfolder named “Subfolder” inside your project’s Assets folder.
+    Inside Subfolder:
+        Create a new .asmdef file.
+        Save a duplicate copy of RethrowError.cs.
+    Create a Default.ruleset file inside Assets with the following code:
+
+<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="New Rule Set" Description=" " ToolsVersion="10.0">
+  <Rules AnalyzerId="ErrorProne.NET.CodeAnalyzers" RuleNamespace="ErrorProne.NET.CodeAnalyzers">
+    <Rule Id="ERP021" Action="Error" />
+  <Rule Id="EPC12" Action="None" />
+  </Rules>
+</RuleSet>
+
+The Default.ruleset file defines the following rules:
+
+    Suppress EPC12, the warning about suspicious exception handling.
+    Elevate ERP021, the warning about incorrect exception propagation, to an error.
+
+Step 2: Reload the project
+
+After you add the ruleset files to your project, reimport any script that lives in an assembly where the rules should apply. This forces Unity to recompile the assembly using the new ruleset files. After recompilation, two messages will appear in the Console window:
+
+Assets\Subfolder\RethrowError.cs(15,19): error ERP021: Incorrect exception propagation. Use throw; instead.
+
+Assets\RethrowError.cs(15,19): error ERP021: Incorrect exception propagation. Use throw; instead.
+
+Notice that Unity applies the rules defined in Default.ruleset to both Assets/RethrowError.cs and Assets/Subfolder/RethrowError.cs.
+Step 3: Add a custom ruleset
+
+In Assets/Subfolder, create a .ruleset file, and give it any name you like (in this exampleHello.ruleset):
+
+<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="New Rule Set" Description=" " ToolsVersion="10.0">
+  <Rules AnalyzerId="ErrorProne.NET.CodeAnalyzers" RuleNamespace="ErrorProne.NET.CodeAnalyzers">
+    <Rule Id="ERP021" Action="Info" />
+    <Rule Id="EPC12" Action="Info" />
+  </Rules>
+</RuleSet>
+
+This new Hello.ruleset file tells Unity to print both EPC12 and ERP021 to the Console, without treating them as warnings or errors.
+
+After Unity compiles the project again, the following messages will appear in the Console window:
+
+Assets\Subfolder\RethrowError.cs(14,23): info EPC12: Suspicious exception handling: only e.Message is observed in exception block.
+
+Assets\Subfolder\RethrowError.cs(15,19): info ERP021: Incorrect exception propagation. Use throw; instead.
+
+Assets\RethrowError.cs(15,19): error ERP021: Incorrect exception propagation. Use throw; instead.
+
+The rules in Default.ruleset still apply to Assets\RethrowError.cs, but they no longer apply to Assets\Subfolder\RethrowError.cs, because the rules in Hello.ruleset override them.
+
+For more information on all the allowed ruleset action files, refer to the Visual Studio documentation on Using the code analysis rule set editor.
+More analyzers
+
+The following are links to Github repositories of other popular Roslyn analyzer libraries:
+
+    awesome-analyzers
+    dotnet/roslyn-analyzers

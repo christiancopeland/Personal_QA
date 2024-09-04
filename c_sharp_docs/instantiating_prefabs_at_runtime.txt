@@ -1,0 +1,256 @@
+Instantiating Prefabs at run time
+
+Prefabs
+come in very handy when you want to instantiate complicated GameObjects
+or collections of GameObjects at run time. Compared with creating GameObjects from scratch using code, instantiating Prefabs using code has many advantages because you can:
+
+    Instantiate a Prefab using one line of code. Creating equivalent GameObjects from scratch requires many more lines of code.
+
+    Set up, test, and modify the Prefab quickly and easily using the Scene
+    view, Hierarchy and Inspector
+    .
+
+    Change which Prefab is instantiated without changing the code. You can make a simple rocket into a super-charged rocket, without any code changes.
+
+Note: You can download a Unity Project containing all the examples on this page, here:
+
+InstantiatingPrefabsExamples.zip
+Basics of instantiating a Prefab
+
+To instantiate a Prefab at run time, your code needs a reference to that Prefab. You can make this reference by creating a public variable in your code to hold the Prefab reference. The public variable in your code appears as an assignable field in the Inspector. You can then assign the actual Prefab you want to use in the Inspector.
+
+The script example below has a single public variable, “myPrefab”, that is a reference to a Prefab. It creates an instance of that Prefab in the Start() method.
+
+using UnityEngine;
+public class InstantiationExample : MonoBehaviour 
+{
+    // Reference to the Prefab. Drag a Prefab into this field in the Inspector.
+    public GameObject myPrefab;
+
+    // This script will simply instantiate the Prefab when the game starts.
+    void Start()
+    {
+        // Instantiate at position (0, 0, 0) and zero rotation.
+        Instantiate(myPrefab, new Vector3(0, 0, 0), Quaternion.identity);
+    }
+}
+
+To use this example:
+
+    Create a new C# script in your Project, and name it “InstantiationExample”.
+
+    Copy and paste in the script example above into your new script, and save it.
+
+    Create an empty GameObject using the menu GameObject > Create Empty.
+
+    Add the script to the new GameObject as a component by dragging it onto the empty GameObject.
+
+    Create any Prefab, and drag it from the Project window
+    into the My Prefab field in the script component.
+
+Dragging a Prefab from the Project window into the My Prefab field in the script component
+Dragging a Prefab from the Project window into the My Prefab field in the script component
+
+When you start Play Mode, you should see your Prefab instantiate at position (0, 0, 0) in the Scene.
+
+You can drag a different Prefab into the My Prefab field in the Inspector to change which Prefab is instantiated, without having to change the script.
+
+Because this first example is very simple, it may not seem to provide any advantage over just placing a Prefab into the Scene yourself. However, being able to instantiate Prefabs using code provides you with powerful abilities to dynamically create complex configurations of GameObjects while your game or app is running, as shown in the following examples.
+Common scenarios
+
+To illustrate the strength of instantiating Prefabs at run time, here are some basic situations where they are useful:
+
+    Building a structure out of a single Prefab by replicating it multiple times in different positions, for example in a grid or circle formation.
+
+    Firing a projectile Prefab from a launcher. The projectile Prefab could be a complex configuration containing a Mesh
+    , Rigidbody
+    , Collider
+    , AudioSource, Dynamic Light, and a child GameObject with its own trail Particle System
+    .
+
+    A vehicle, building or character, for example a robot, breaking apart into many pieces. In this scenario, the example script deletes and replaces the complete, operational robot Prefab with a wrecked robot Prefab. This wrecked Prefab consists of separate broken parts of the robot, each set up with Rigidbodies and Particle Systems of their own. This technique allows you to blow up a robot into many pieces, with just one line of code, which replaces the original GameObject with a wrecked Prefab.
+
+The following sections show you how to implement these scenarios.
+Building a structure
+
+You can use code to create many copies of a Prefab in a particular configuration almost instantaneously. Using code to generate structures like this is called procedural generation. The example below creates a wall of block instances.
+
+To try this example, create the script below, name it Wall, and place it on an empty GameObject in your Scene.
+
+using UnityEngine;
+public class Wall : MonoBehaviour
+{
+   public GameObject block;
+   public int width = 10;
+   public int height = 4;
+  
+   void Start()
+   {
+       for (int y=0; y<height; ++y)
+       {
+           for (int x=0; x<width; ++x)
+           {
+               Instantiate(block, new Vector3(x,y,0), Quaternion.identity);
+           }
+       }       
+   }
+}
+
+When you have done this, you should see the Block variable in the Inspector, with the word None in the field. A value of “None” means that no Prefab has been assigned to this variable yet.
+The Block variable, with no Prefab assigned yet
+The Block variable, with no Prefab assigned yet
+
+The example script above won’t work until you assign a Prefab to the Block variable. To create a simple block Prefab:
+
+    Choose GameObject > 3D Object > Cube.
+
+    Drag the cube from the Hierarchy window into the Assets folder in the Project window. This creates a Prefab Asset.
+
+    Rename your Prefab to “Block”.
+
+    Now that your Block Prefab exists as an Asset, you can safely delete the cube from your Hierarchy.
+
+Now that you have created a Block Prefab, you can assign it to the Block variable. Select your original GameObject (the one with the “Wall” script attached to it). Then drag the “Block” Prefab from the Project window into the “Block” variable slot (where it says “None”).
+The Block variable, with the Block Prefab assigned to it
+The Block variable, with the Block Prefab assigned to it
+
+When you have finished this set-up, click Play and you’ll see that Unity builds the wall using the Prefab:
+A wall built from 4 rows of 10 blocks, as generated by the example above.
+A wall built from 4 rows of 10 blocks, as generated by the example above.
+
+This is a flexible workflow pattern that you can use over and over again in Unity. Because you are using a Prefab in this script, you can easily replace or edit the Prefab to modify the properties of the bricks in the wall, without needing to touch the script. You can also use your Wall script on other GameObjects in your Scene with different Prefabs assigned to them to have various walls made from different types of Prefab.
+
+You can use code to place a GameObject in a grid, in circle pattern, randomly scattered, or any other configurations that you can think of to fit whatever game or app you are creating. Here’s another example showing how to place instances in a circular formation:
+
+using UnityEngine;
+public class CircleFormation : MonoBehaviour
+{
+   // Instantiates prefabs in a circle formation
+   public GameObject prefab;
+   public int numberOfObjects = 20;
+   public float radius = 5f;
+   void Start()
+   {
+       for (int i = 0; i < numberOfObjects; i++)
+       {
+           float angle = i * Mathf.PI * 2 / numberOfObjects;
+           float x = Mathf.Cos(angle) * radius;
+           float z = Mathf.Sin(angle) * radius;
+           Vector3 pos = transform.position + new Vector3(x, 0, z);
+           float angleDegrees = -angle*Mathf.Rad2Deg;
+           Quaternion rot = Quaternion.Euler(0, angleDegrees, 0);
+           Instantiate(prefab, pos, rot);
+       }
+   }
+}
+
+A circular arrangement of blocks, as generated by the example above
+A circular arrangement of blocks, as generated by the example above
+Instantiating projectiles & explosions
+
+In this scenario:
+
+    A “Launcher” GameObject instantiates a projectile Prefab when the player presses the fire button. The Prefab contains a mesh, a Rigidbody, and a Collider, so it can fly through the air and detect when a collision
+    occurs.
+
+    The projectile collides with something and instantiates an explosion Prefab. The explosion Prefab contains a Particle System effect and a script that applies a force to surrounding GameObjects.
+
+In the same way as the Block Prefab above, you can instantiate the projectile in just one line of code, no matter how complex the projectile Prefab is. After instantiating the Prefab, you can also modify any properties of the instantiated GameObject. For example, you can set the velocity of the projectile’s Rigidbody.
+
+As well as being easier to use, you can modify the Prefab later on without touching the code. So if your projectile is a rocket, later on you could add a Particle System to it to make it leave a cloud trail. After you do this, all your instantiated rockets have particle trails.
+
+This script shows how to launch a projectile using the Instantiate() function.
+
+using UnityEngine;
+public class FireProjectile : MonoBehaviour
+{
+    public Rigidbody projectile;
+    public float speed = 4;
+    void Update()
+    {
+        if (Input.GetButtonDown("Fire1"))
+        {
+            Rigidbody p = Instantiate(projectile, transform.position, transform.rotation);
+            p.velocity = transform.forward * speed;
+        }
+    }
+}
+
+In the code, the Prefab variable type is a Rigidbody, and not GameObject. This has two useful effects:
+
+    Only GameObjects that have a Rigidbody component can be assigned to this variable. This is useful because it helps make sure you’re assigning the correct GameObject to the variable.
+
+    The Instantiate method returns a reference to the Rigidbody component on the new instance. This is useful because it makes it simple to set the velocity of the Rigidbody immediately after instantiating it.
+
+When making a public Prefab variable, the variable type can be a GameObject, or it can be any valid Component type (either a built-in Unity component or one of your own MonoBehaviour script).
+
+For GameObject type variables, you can assign any GameObject to the variable, and the Instantiate function returns a reference to the new GameObject instance.
+
+For component type variables (such as Rigidbody, Collider, and Light), you can only assign GameObjects of that component type to the variable, and the Instantiate function returns a reference to that specific component on the new GameObject instance.
+
+The following script (placed on the projectile Prefab) performs the action of instantiating the explosion at the projectile’s current position and removing the projectile GameObject when the projectile collides with something.
+
+using UnityEngine;
+public class Projectile : MonoBehaviour
+{
+   public GameObject explosion;
+   void OnCollisionEnter()
+   {
+       Instantiate(explosion,transform.position,transform.rotation);
+       Destroy(gameObject);
+   }
+}
+
+An example of projectile Prefabs being instantiated, and replaced with explosion Prefabs when they impact
+An example of projectile Prefabs being instantiated, and replaced with explosion Prefabs when they impact
+
+Notice in the image above, which shows the scripts
+running in Play mode, the instantiated GameObjects appear in the Hierarchy, with the word “(Clone)” appended to the name.
+Replacing a character with a ragdoll or wreck
+
+Often in games, you might want to switch a character, vehicle, building or other Asset from an “intact” state to a “destroyed” state. Rather than trying to modify the intact version of the GameObject (such as removing scripts, adding Rigidbody components and so on), it’s often much more efficient and effective to delete the entire intact GameObject and replace it with an instantiated destroyed Prefab. This gives you a lot of flexibility. You could use a different Material for the destroyed version, attach completely different scripts, or instantiate a Prefab containing the GameObject broken into many pieces to simulate a wrecked and shattered version of the original GameObject. Any of these options can be achieved with a single call to Instantiate(), to bring your destroyed version into the Scene, while deleting the original.
+
+Most importantly, you can create the destroyed version which you Instantiate() with completely different GameObjects compared to the original. For example, to create a breakable robot, you would model two versions: one that consists of a single GameObject with Mesh Renderer
+
+and scripts for robot movement, and the other that consists of several skeletal parts that can be controlled individually by physics. Your game runs faster when using the model with just one GameObject, because the model contains fewer triangles and so it renders faster than the robot that has many small parts. Also while your robot is happily walking around, there is no reason to have it in separate parts.
+
+To build a wrecked robot Prefab, you could:
+
+    Model your robot with lots of different skeletal parts in your favorite 3D modeling software, and export it into the Assets folder of your Unity Project.
+
+    Create an empty Scene in the Unity Editor.
+
+    Drag the model from the Project window into the empty Scene.
+
+    Add Rigidbodies to all parts, by selecting all the parts and choosing Component > Physics > Rigidbody.
+
+    Add Colliders to all parts by selecting all the parts and choosing Component > Physics > Mesh Collider (enable the Convex option for faster performance).
+
+    Make sure you parent all the parts of your wrecked robot to a single root GameObject.
+
+    For an extra special effect, add a smoke-like Particle System as a child GameObject to each of the parts.
+
+    Now you have a robot with multiple explodable parts. The parts can fall to the ground because they are controlled by physics, and each part creates a Particle trail due to the attached Particle System.
+
+    Click Play to preview how your model reacts, and make any necessary tweaks.
+
+    Drag the root GameObject into the Assets folder in the Project window to create a new Prefab.
+
+The following example shows how you can model these steps in code.
+
+using UnityEngine;
+public class WreckOnCollision : MonoBehaviour
+{
+   public GameObject wreckedVersion;
+   // Update is called once per frame
+   void OnCollisionEnter()
+   {
+       Destroy(gameObject);
+       Instantiate(wreckedVersion,transform.position,transform.rotation);
+   }
+}
+
+An example of a robot Prefab being swapped for a wrecked Prefab when hit by a projectile
+An example of a robot Prefab being swapped for a wrecked Prefab when hit by a projectile
+
+You can download a Project containing all these example, here: InstantiatingPrefabsExamples.zip 

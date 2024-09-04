@@ -1,0 +1,8 @@
+Transform
+
+The Transform class provides you with a variety of ways to work with a GameObject
+’s position, rotation and scale via script, as well as its hierarchical relationship to parent and child GameObjects.
+
+For a full overview of working with Transforms in the Editor, see the Transform user manual page.
+
+For an exhaustive reference of every member of the Transform class and further technical details about it, see the Transform script reference.

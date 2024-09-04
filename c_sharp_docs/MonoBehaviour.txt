@@ -1,0 +1,62 @@
+MonoBehaviour
+Switch to Scripting
+
+The MonoBehaviour class is the base class from which every Unity script derives, by default. When you create a C# script from Unity’s project window
+, it automatically inherits from MonoBehaviour, and provides you with a template script. See Creating and Using scripts for more information on this.
+
+The MonoBehaviour class provides the framework which allows you to attach your script to a GameObject in the editor, as well as providing hooks into useful Events such as Start and Update.
+
+For a complete reference of every member of the MonoBehaviour class, and its technical details, see the MonoBehaviour script reference.
+The script inspector
+
+When you select a script in the Project window, the Inspector
+displays some basic information about that script asset, including the name of the assembly it belongs to, and a preview of the contents of the script.
+
+Note: Although the Inspector displays the contents of the script, you can’t edit the script in the Inspector window.
+The script Inspector displaying an example script.
+The script Inspector displaying an example script.
+
+The script inspector also displays two buttons, Open and Execution Order.
+
+The Open button opens the script in the currently configured External Script Editor (also known as an Integrated Development Environment, or IDE). The Open button performs the same function as double-clicking the script in the Project window. You can configure which external editor Unity uses to open your scripts
+in the External Tools section of the Preferences window.
+
+The Execution Order button opens the Script Execution Order section of the Project Settings window, which allows you to alter the the order in which Unity executes your scripts.
+
+Default object references
+
+If you define public Object
+fields that can be assigned in the Editor in your MonoBehaviour script, you can set up default references for these fields. The default reference fields are visible in the inspector when you select the script asset in the Project window.
+A MonoBehaviour script with three AudioClip fields. The default references for these fields are shown unset.
+A MonoBehaviour script with three AudioClip fields. The default references for these fields are shown unset.
+
+In the example above, there are three public Audio Clip
+fields, without default references assigned. You could assign audio clips to each of the AudioClip default reference fields.
+
+If you assign default references, they are applied when you add your MonoBehaviour as a component to a GameObject, or when you reset an existing instance of your MonoBehaviour on a GameObject to its default values.
+
+Note: There is no ongoing link between the references on MonoBehaviour instances on GameObjects and the default references. This means if you change the default references, they are not automatically updated on existing GameObjects.
+
+Other types of inspector-editable fields that do not inherit from UnityEngine.Object (for example, public string or int fields) do not have default fields in the inspector. Instead, they take their default values from the script itself.
+Coroutines
+
+The MonoBehaviour class allows you to start, stop, and manage Coroutines, which are a way to write asynchronous code which can include waiting for a certain amount of time, or for certain actions to complete, while allowing other code to continue executing.
+
+For more information about coroutines, see the Coroutines manual page and the StartCoroutine method script reference.
+Events
+
+The MonoBehaviour class provides access to a large collection of event messages, which allows you to execute your code based on what is currently happening in your project. Here are a few of the more common examples. For a list of them all, see the Messages section on the MonoBehaviour script reference page
+
+Start - called when the GameObject begins to exist (either when the Scene is loaded, or the GameObject is instantiated).
+
+Update - called every frame.
+
+FixedUpdate - called every physics timestep.
+
+OnBecameVisible and OnBecameInvisible - called when a GameObject’s renderer enters or leaves a camera
+’s view.
+
+OnCollisionEnter and OnTriggerEnter - called when physics collisions
+or triggers occur.
+
+OnDestroy - called when the GameObject is destroyed.
